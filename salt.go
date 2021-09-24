@@ -49,11 +49,12 @@ func (s *Salt) Generate(length int) []byte {
 		saltLen++
 	}
 	salt := make([]byte, saltLen)
-	rand.Read(salt)
+	_, _ = rand.Read(salt)
 
 	out := make([]byte, len(s.MagicPrefix)+length)
 	copy(out, s.MagicPrefix)
 	copy(out[len(s.MagicPrefix):], Base64_24Bit(salt))
+
 	return out
 }
 
@@ -90,7 +91,7 @@ func (s *Salt) GenerateWRounds(length, rounds int) []byte {
 		saltLen++
 	}
 	salt := make([]byte, saltLen)
-	rand.Read(salt)
+	_, _ = rand.Read(salt)
 
 	roundsText := ""
 	if rounds != s.RoundsDefault {
@@ -101,5 +102,6 @@ func (s *Salt) GenerateWRounds(length, rounds int) []byte {
 	copy(out, s.MagicPrefix)
 	copy(out[len(s.MagicPrefix):], []byte(roundsText))
 	copy(out[len(s.MagicPrefix)+len(roundsText):], Base64_24Bit(salt))
+
 	return out
 }

@@ -21,7 +21,7 @@ const alphabet = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx
 //   4. Top 6 bits of the third byte.
 //
 // This encoding method does not emit padding bytes as Base64 does.
-func Base64_24Bit(src []byte) (hash []byte) {
+func Base64_24Bit(src []byte) []byte {
 	if len(src) == 0 {
 		return []byte{} // TODO: return nil
 	}
@@ -30,7 +30,7 @@ func Base64_24Bit(src []byte) (hash []byte) {
 	if (len(src) % 6) != 0 {
 		hashSize += 1
 	}
-	hash = make([]byte, hashSize)
+	hash := make([]byte, hashSize)
 
 	dst := hash
 	for len(src) > 0 {
@@ -56,5 +56,5 @@ func Base64_24Bit(src []byte) (hash []byte) {
 		}
 	}
 
-	return
+	return hash
 }

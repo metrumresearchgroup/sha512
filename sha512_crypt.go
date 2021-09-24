@@ -216,6 +216,7 @@ func (c *crypter) Verify(hashedKey string, key []byte) error {
 	if newHash != hashedKey {
 		return ErrKeyMismatch
 	}
+
 	return nil
 }
 
@@ -230,6 +231,7 @@ func (c *crypter) Cost(hashedKey string) (int, error) {
 	}
 	roundToks := bytes.Split(saltToks[2], []byte{'='})
 	cost, err := strconv.ParseInt(string(roundToks[1]), 10, 0)
+
 	return int(cost), err
 }
 

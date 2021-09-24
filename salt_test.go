@@ -16,17 +16,17 @@ import (
 )
 
 var _Salt = &Salt{
-	MagicPrefix: []byte("$foo$"),
-	SaltLenMin:  1,
-	SaltLenMax:  8,
-	RoundsMin: 1000,
-	RoundsMax: 999999999,
+	MagicPrefix:   []byte("$foo$"),
+	SaltLenMin:    1,
+	SaltLenMax:    8,
+	RoundsMin:     1000,
+	RoundsMax:     999999999,
 	RoundsDefault: 5000,
 }
 
 func TestGenerateSalt(t *testing.T) {
 	magicPrefixLen := len(_Salt.MagicPrefix)
-	
+
 	salt := _Salt.Generate(0)
 	if len(salt) != magicPrefixLen+1 {
 		t.Errorf("Expected len 1, got len %d", len(salt))
@@ -55,6 +55,5 @@ func TestGenerateSaltWRounds(t *testing.T) {
 	expectedPrefix := string(_Salt.MagicPrefix) + "rounds=" + strconv.Itoa(rounds) + "$"
 	if !strings.HasPrefix(string(salt), expectedPrefix) {
 		t.Errorf("salt '%s' should start with prefix '%s' but didn't", salt, expectedPrefix)
-
 	}
 }
