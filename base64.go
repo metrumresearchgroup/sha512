@@ -26,13 +26,20 @@ func Base64_24Bit(src []byte) []byte {
 		return []byte{} // TODO: return nil
 	}
 
-	hashSize := (len(src) * 8) / 6
-	if (len(src) % 6) != 0 {
-		hashSize += 1
+	var (
+		hash []byte
+	)
+	{
+		hashSize := (len(src) * 8) / 6
+		if (len(src) % 6) != 0 {
+			hashSize += 1
+		}
+
+		hash = make([]byte, hashSize)
 	}
-	hash := make([]byte, hashSize)
 
 	dst := hash
+
 	for len(src) > 0 {
 		switch len(src) {
 		default:
