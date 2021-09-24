@@ -31,33 +31,6 @@ type Salt struct {
 	RoundsDefault int
 }
 
-// Generate generates a random salt of a given length.
-//
-// The length is set thus:
-//
-//   length > SaltLenMax: length = SaltLenMax
-//   length < SaltLenMin: length = SaltLenMin
-func (s *Salt) Generate(length int) []byte {
-	if length > s.SaltLenMax {
-		length = s.SaltLenMax
-	} else if length < s.SaltLenMin {
-		length = s.SaltLenMin
-	}
-
-	saltLen := (length * 6 / 8)
-	if (length*6)%8 != 0 {
-		saltLen++
-	}
-	salt := make([]byte, saltLen)
-	_, _ = rand.Read(salt)
-
-	out := make([]byte, len(s.MagicPrefix)+length)
-	copy(out, s.MagicPrefix)
-	copy(out[len(s.MagicPrefix):], Base64_24Bit(salt))
-
-	return out
-}
-
 // GenerateWRounds creates a random salt with the random bytes being of the
 // length provided, and the rounds parameter set as specified.
 //
@@ -72,7 +45,7 @@ func (s *Salt) Generate(length int) []byte {
 //
 // If rounds is equal to RoundsDefault, then the "rounds=" part of the salt is
 // removed.
-func (s *Salt) GenerateWRounds(length, rounds int) []byte {
+func (s *Salt) GenerateWRounds(length, rounds int) ([]byte, error) {
 	if length > s.SaltLenMax {
 		length = s.SaltLenMax
 	} else if length < s.SaltLenMin {
@@ -86,12 +59,17 @@ func (s *Salt) GenerateWRounds(length, rounds int) []byte {
 		rounds = s.RoundsMax
 	}
 
-	saltLen := (length * 6 / 8)
-	if (length*6)%8 != 0 {
-		saltLen++
+	var salt []byte
+	{
+		saltLen := length * 6 / 8
+		if (length*6)%8 != 0 {
+			saltLen++
+		}
+		salt = make([]byte, saltLen)
+		if _, err := rand.Read(salt); err != nil {
+			return nil, err
+		}
 	}
-	salt := make([]byte, saltLen)
-	_, _ = rand.Read(salt)
 
 	roundsText := ""
 	if rounds != s.RoundsDefault {
@@ -103,5 +81,5 @@ func (s *Salt) GenerateWRounds(length, rounds int) []byte {
 	copy(out[len(s.MagicPrefix):], []byte(roundsText))
 	copy(out[len(s.MagicPrefix)+len(roundsText):], Base64_24Bit(salt))
 
-	return out
+	return out, nil
 }

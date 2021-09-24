@@ -29,19 +29,22 @@ const (
 
 var _rounds = []byte("rounds=")
 
-type crypter struct{ Salt Salt }
+type SHA512 struct{ Salt Salt }
 
 // New returns a new crypt.Crypter computing the SHA512-crypt password hashing.
 func New() Crypter {
-	return &crypter{GetSalt()}
+	return &SHA512{GetSalt()}
 }
 
-func (c *crypter) Generate(key, salt []byte) (string, error) {
+func (c *SHA512) Generate(key, salt []byte) (string, error) {
 	var rounds int
 	var isRoundsDef bool
 
 	if len(salt) == 0 {
-		salt = c.Salt.GenerateWRounds(SaltLenMax, RoundsDefault)
+		var err error
+		if salt, err = c.Salt.GenerateWRounds(SaltLenMax, RoundsDefault); err != nil {
+			return "", err
+		}
 	}
 	if !bytes.HasPrefix(salt, c.Salt.MagicPrefix) {
 		return "", ErrSaltPrefix
@@ -208,7 +211,7 @@ func (c *crypter) Generate(key, salt []byte) (string, error) {
 	return string(out), nil
 }
 
-func (c *crypter) Verify(hashedKey string, key []byte) error {
+func (c *SHA512) Verify(hashedKey string, key []byte) error {
 	newHash, err := c.Generate(key, []byte(hashedKey))
 	if err != nil {
 		return err
@@ -220,7 +223,7 @@ func (c *crypter) Verify(hashedKey string, key []byte) error {
 	return nil
 }
 
-func (c *crypter) Cost(hashedKey string) (int, error) {
+func (c *SHA512) Cost(hashedKey string) (int, error) {
 	saltToks := bytes.Split([]byte(hashedKey), []byte{'$'})
 	if len(saltToks) < 3 {
 		return 0, ErrSaltFormat
@@ -235,7 +238,7 @@ func (c *crypter) Cost(hashedKey string) (int, error) {
 	return int(cost), err
 }
 
-func (c *crypter) SetSalt(salt Salt) { c.Salt = salt }
+func (c *SHA512) SetSalt(salt Salt) { c.Salt = salt }
 
 func GetSalt() Salt {
 	return Salt{
